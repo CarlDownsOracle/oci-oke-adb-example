@@ -1,0 +1,1 @@
+kubectl create secret docker-registry ocirsecret --docker-server=<region-key>.ocir.io --docker-username='<tenancy-namespace>/oracleidentitycloudservice/<oci-username>' --docker-password='<oci-auth-token>' --docker-email='<email-address>'

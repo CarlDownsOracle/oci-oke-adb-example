@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: enghouse-svc
+spec:
+  selector:
+    app: enghouse-app
+  ports:
+  - protocol: "TCP"
+    port: 6000
+    targetPort: 5000
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enghouse-oke-phx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: enghouse-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: enghouse-app
+    spec:
+      imagePullSecrets:
+      - name: ocirsecret
+      containers:
+      - name: enghouse-oke-app
+        image: phx.ocir.io/orasenatdpltintegration03/enghouse/enghouse-oke-app:latest
+#        image: <region-key>.ocir.io/<tenancy-namespace>/<repo-name>:<tag>
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: enghouse-env-secret
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: enghouse-env-secret
+              key: DB_PASSWORD
+        - name: DB_TNS_SERVICE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: enghouse-env-secret
+              key: DB_TNS_SERVICE_NAME
+        - name: TNS_ADMIN
+          value: "/wallet"
+        volumeMounts:
+        - name: all-in-one
+          mountPath: "/wallet"
+          readOnly: true
+      volumes:
+      - name: all-in-one
+        projected:
+          sources:
+          - secret:
+              name: enghouse-wallet-secret
+              items:
+                - key: sqlnet.ora
+                  path: sqlnet.ora
+                - key: tnsnames.ora
+                  path: tnsnames.ora
+                - key: cwallet.sso
+                  path: cwallet.sso

@@ -1,0 +1,10 @@
+<html>
+  <head>
+    <title>Flask app</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/show_all.css') }}">
+  </head>
+{% block body %}
+  <h2>Database System Date</h2>
+  <h3>{{ date }}</h3>
+{% endblock %}
+</html>
